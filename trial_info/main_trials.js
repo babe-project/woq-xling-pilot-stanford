@@ -7,19 +7,31 @@ let trials_50 = _.map(
         49
     ),
     function(nrFocal) {
+        const fc = _.shuffle(['black', 'white'])[0];
         return {
-            nrTotal: 49,
-            nrFocal: nrFocal,
-            focalColor: _.shuffle(["black", "white"])[0]
+            total: 49,
+            size: 10,
+            rows: 5,
+            focalColor: fc,
+            otherColor: fc === 'black' ? 'white' : 'black',
+            focalShape: 'circle',
+            focalNumber: nrFocal,
+            otherShape: 'circle'
         };
     }
 );
 
 let trials_10 = _.map(_.range(11), function(nrFocal) {
+    const fc = _.shuffle(['black', 'white'])[0];
     return {
-        nrTotal: 10,
-        nrFocal: nrFocal,
-        focalColor: _.shuffle(["black", "white"])[0]
+        total: 10,
+        size: 20,
+        rows: 2,
+        focalColor: fc,
+        otherColor: fc === 'black' ? 'white' : 'black',
+        focalShape: 'circle',
+        focalNumber: nrFocal,
+        otherShape: 'circle'
     };
 });
 

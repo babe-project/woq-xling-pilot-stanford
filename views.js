@@ -75,7 +75,7 @@ babeViews.describePicture = function(config) {
 
                 <br/>
                 
-                <canvas id="situation" style="width:600px;height:400px"></canvas>
+                <canvas id="situation" style="width:600px;height:300px;background:lightgrey"></canvas>
 
                 <br/>
 
@@ -101,19 +101,25 @@ babeViews.describePicture = function(config) {
                 Mustache.render(viewTemplate, {
                     title: this.title,
                     focalColor: config.data[CT].focalColor,
-                    nrTotal: config.data[CT].nrTotal,
-                    nrFocal: config.data[CT].nrFocal
+                    nrTotal: config.data[CT].total,
+                    nrFocal: config.data[CT].focalNumber
                 })
             );
 
-            draw(
-                'situation',
-                config.data[CT].nrTotal,
-                config.data[CT].nrFocal,
-                config.data[CT].focalColor,
-                // Other color
-                config.data[CT].focalColor === 'black' ? 'white' : 'black'
+            drawOnCanvas(
+                document.getElementById('situation'),
+                config.data[CT],
+                'random'
             );
+
+            // draw(
+            //     'situation',
+            //     config.data[CT].nrTotal,
+            //     config.data[CT].nrFocal,
+            //     config.data[CT].focalColor,
+            //     // Other color
+            //     config.data[CT].focalColor === 'black' ? 'white' : 'black'
+            // );
 
             $('#the-button').on('click', function(e) {
                 // First hide the error info in case there's a previous error already shown.
@@ -189,8 +195,8 @@ babeViews.truthValueJudgement = function(config) {
                 Mustache.render(viewTemplate, {
                     title: this.title,
                     focalColor: config.data[CT].focalColor,
-                    nrTotal: config.data[CT].nrTotal,
-                    nrFocal: config.data[CT].nrFocal
+                    nrTotal: config.data[CT].total,
+                    nrFocal: config.data[CT].focalNumber
                 })
             );
 
