@@ -180,6 +180,10 @@ function get50Points(n_total, n_target, tcolor, ocolor, w, h, radius) {
                 color: pointcolors[pcnt]
             });
             pcnt++;
+            // This is a hack to accomodate the 49-ball situation. A long-term solution would be to come up with a real generic `getPoints` method.
+            if (pcnt > n_total - 1) {
+                break;
+            }
         }
     }
     return points;
@@ -244,7 +248,8 @@ function draw(id, n_total, n_target, tcolor, ocolor) {
                 canvas.height,
                 radius
             );
-        } else if (n_total == 50) {
+            // Hacky. Just trying to play off on the code structure left over from the original woq.
+        } else if (n_total == 50 || n_total == 49) {
             points = get50Points(
                 n_total,
                 n_target,

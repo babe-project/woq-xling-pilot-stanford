@@ -1,19 +1,18 @@
 let introView = babeViews.intro({
     name: 'intro',
     trials: 1,
-    title: "Welcome!",
-    text:
-        'Thanks for taking part in this experiment. .... ',
-    buttonText: "Begin Experiment"
+    title: 'Welcome!',
+    text: 'Thanks for taking part in this experiment. .... ',
+    buttonText: 'Begin Experiment'
 });
 
 let instructionsView = babeViews.instructions({
     name: 'instructions',
     trials: 1,
-    title: "Instructions",
+    title: 'Instructions',
     text:
-        "In this experiment we are interested in how you express quantity in your native language. There are several parts. ...",
-    buttonText: "Go to first part."
+        'In this experiment we are interested in how you express quantity in your native language. There are several parts. ...',
+    buttonText: 'Go to first part.'
 });
 
 //let practiceView = babeViews.forcedChoice({
@@ -34,28 +33,28 @@ let beginSecondPart = babeViews.begin({
     name: 'Second',
     trials: 1,
     text:
-        "Thanks for your answers. We will now show you similar pictures again. We will also show you some of the responses that you (or other speakers of your native language) have given so far. For each picture and sentence, please judge whether the sentence is a good description of the picture."
+        'Thanks for your answers. We will now show you similar pictures again. We will also show you some of the responses that you (or other speakers of your native language) have given so far. For each picture and sentence, please judge whether the sentence is a good description of the picture.'
 });
 
 let mainView = babeViews.forcedChoice({
     name: 'main',
     trials: 2,
-    trial_type: "main",
+    trial_type: 'main',
     data: main_trials
 });
 
 let postTestView = babeViews.postTest({
     name: 'posttest',
     trials: 1,
-    title: "Additional Info",
+    title: 'Additional Info',
     text:
-        "Answering the following questions is optional, but will help us understand your answers."
+        'Answering the following questions is optional, but will help us understand your answers.'
 });
 
 let thanksView = babeViews.thanks({
     name: 'thanks',
     trials: 1,
-    title: "Thank you for taking part in this experiment!"
+    title: 'Thank you for taking part in this experiment!'
 });
 
 babeViews.describePicture = function(config) {
@@ -65,35 +64,44 @@ babeViews.describePicture = function(config) {
         render(CT, _babe) {
             let startTime = Date.now();
 
-            const viewTemplate =
-            `<div class='view'>
-                {{# title }}
-                <h1 class="title">{{ title }}</h1>
-                {{/ title }}
+            const viewTemplate = `<div class='view'>
+            
+            <h1 class="title">{{ title }}</h1>
                 
                 Here will be a picure with  
-				{{# nrTotal }}	{{ nrTotal }}  {{/ nrTotal }} balls 
-				of which {{# nrFocal }}	{{ nrFocal }}  {{/ nrFocal }} 
-				are  {{# focalColor }}	{{ focalColor }}  {{/ focalColor }}.
+                {{ nrTotal }} balls 
+                of which {{ nrFocal }} 
+                are  {{ focalColor }}.
                 
-				TextBox input is missing.
+                TextBox input is missing.
+
+                <canvas id="situation" style="width:600px;height:400px"></canvas>
 
                 <button id="the-button">Press me!</button>
             </div>`;
 
-            $("#main").html(
+            $('#main').html(
                 Mustache.render(viewTemplate, {
                     title: this.title,
-					focalColor: config.data[CT].focalColor,
-					nrTotal: config.data[CT].nrTotal,
-					nrFocal: config.data[CT].nrFocal
+                    focalColor: config.data[CT].focalColor,
+                    nrTotal: config.data[CT].nrTotal,
+                    nrFocal: config.data[CT].nrFocal
                 })
             );
-			
+
+            draw(
+                'situation',
+                config.data[CT].nrTotal,
+                config.data[CT].nrFocal,
+                config.data[CT].focalColor,
+                // Other color
+                config.data[CT].focalColor === 'black' ? 'white' : 'black'
+            );
+
             $('#the-button').on('click', function(e) {
                 _babe.trial_data.push({
                     trial_type: config.trial_type,
-                    trial_number: CT+1,
+                    trial_number: CT + 1,
                     RT: Date.now() - startTime
                 });
                 _babe.findNextView();
@@ -110,7 +118,7 @@ let describePicture = babeViews.describePicture({
     name: 'describePicture',
     title: 'Describe the picture',
     trial_type: 'describePicture',
-	data: main_trials,
+    data: main_trials,
     trials: 3 // set eventually to : main_trials.length
 });
 
@@ -121,35 +129,34 @@ babeViews.truthValueJudgement = function(config) {
         render(CT, _babe) {
             let startTime = Date.now();
 
-            const viewTemplate =
-            `<div class='view'>
+            const viewTemplate = `<div class='view'>
                 {{# title }}
                 <h1 class="title">{{ title }}</h1>
                 {{/ title }}
                 
                 Here will be a picure with  
-				{{# nrTotal }}	{{ nrTotal }}  {{/ nrTotal }} balls 
-				of which {{# nrFocal }}	{{ nrFocal }}  {{/ nrFocal }} 
-				are  {{# focalColor }}	{{ focalColor }}  {{/ focalColor }}.
+                {{# nrTotal }}	{{ nrTotal }}  {{/ nrTotal }} balls 
+                of which {{# nrFocal }}	{{ nrFocal }}  {{/ nrFocal }} 
+                are  {{# focalColor }}	{{ focalColor }}  {{/ focalColor }}.
                 
-				There should then be the usual binary forced choice task with two buttons and their labels
+                There should then be the usual binary forced choice task with two buttons and their labels
 
                 <button id="the-button">Press me!</button>
             </div>`;
 
-            $("#main").html(
+            $('#main').html(
                 Mustache.render(viewTemplate, {
                     title: this.title,
-					focalColor: config.data[CT].focalColor,
-					nrTotal: config.data[CT].nrTotal,
-					nrFocal: config.data[CT].nrFocal
+                    focalColor: config.data[CT].focalColor,
+                    nrTotal: config.data[CT].nrTotal,
+                    nrFocal: config.data[CT].nrFocal
                 })
             );
-			
+
             $('#the-button').on('click', function(e) {
                 _babe.trial_data.push({
                     trial_type: config.trial_type,
-                    trial_number: CT+1,
+                    trial_number: CT + 1,
                     RT: Date.now() - startTime
                 });
                 _babe.findNextView();
@@ -166,23 +173,20 @@ let truthValueJudgement = babeViews.truthValueJudgement({
     name: 'truthValueJudgement',
     title: 'is the sentence a good description of the picture',
     trial_type: 'truthValueJudgement',
-	data: main_trials,
+    data: main_trials,
     trials: 3 // set eventually to : main_trials.length
 });
-
 
 // customize the experiment by specifying a view order and a trial structure
 // specify view order
 const views_seq = [
     introView,
     instructionsView,
-//    practiceView,
+    //    practiceView,
     beginFirstPart,
     describePicture,
-	beginSecondPart,
-	truthValueJudgement,
+    beginSecondPart,
+    truthValueJudgement,
     postTestView,
     thanksView
 ];
-
-
