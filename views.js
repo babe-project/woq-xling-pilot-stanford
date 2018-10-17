@@ -68,14 +68,31 @@ babeViews.describePicture = function(config) {
             
             <h1 class="title">{{ title }}</h1>
                 
-                Here will be a picure with  
+                <p>Here will be a picure with  
                 {{ nrTotal }} balls 
                 of which {{ nrFocal }} 
-                are  {{ focalColor }}.
-                
-                TextBox input is missing.
+                are  {{ focalColor }}.</p>
 
+                <br/>
+                
                 <canvas id="situation" style="width:600px;height:400px"></canvas>
+
+                <br/>
+
+                <p> How would you translate this description of the picture into your native language? Put &#64; (<i>at</i> signs) around each of the words that express quantity. </p>
+
+                <p>Please provide at least one translation.</p>
+
+                <br/>
+
+                <textarea class="response-input response-input-1" cols="40"></textarea>
+                <br><br>
+                <textarea class="response-input response-input-2" cols="40"></textarea>
+                <br><br>
+                <textarea class="response-input response-input-3" cols="40"></textarea>
+
+                <p class="error-info err-no-input">Please fill in at least one textarea.</p>
+                <p class="error-info err-no-quantifier">Please use @ @ around the corresponding words to indicate them. It doesn't have to be a one-to-one correspondence; you may mark multiple words, if needed.</p>
 
                 <button id="the-button">Press me!</button>
             </div>`;
@@ -99,12 +116,36 @@ babeViews.describePicture = function(config) {
             );
 
             $('#the-button').on('click', function(e) {
-                _babe.trial_data.push({
-                    trial_type: config.trial_type,
-                    trial_number: CT + 1,
-                    RT: Date.now() - startTime
-                });
-                _babe.findNextView();
+                // First hide the error info in case there's a previous error already shown.
+                $('.error-info').hide();
+                // Collect the responses
+                const responseInput1 = $('.response-input-1').val();
+                const responseInput2 = $('.response-input-2').val();
+                const responseInput3 = $('.response-input-3').val();
+
+                if (
+                    responseInput1.length <= 0 &&
+                    responseInput2.length <= 0 &&
+                    responseInput3.length <= 0
+                ) {
+                    $('.err-no-input').show();
+                } else if (
+                    validButNoAtSign(responseInput1) ||
+                    validButNoAtSign(responseInput2) ||
+                    validButNoAtSign(responseInput3)
+                ) {
+                    $('.err-no-quantifier').show();
+                } else {
+                    _babe.trial_data.push({
+                        trial_type: config.trial_type,
+                        trial_number: CT + 1,
+                        RT: Date.now() - startTime,
+                        response1: responseInput1,
+                        response2: responseInput2,
+                        response3: responseInput3
+                    });
+                    _babe.findNextView();
+                }
             });
         },
         CT: 0,
@@ -119,7 +160,7 @@ let describePicture = babeViews.describePicture({
     title: 'Describe the picture',
     trial_type: 'describePicture',
     data: main_trials,
-    trials: 3 // set eventually to : main_trials.length
+    trials: 3 // TODO: set eventually to : main_trials.length
 });
 
 babeViews.truthValueJudgement = function(config) {

@@ -280,3 +280,12 @@ function draw(id, n_total, n_target, tcolor, ocolor) {
         }
     }
 }
+
+function validButNoAtSign(responseInput) {
+    return (
+        responseInput.length > 0 &&
+        (responseInput.split('@').length - 1 <= 1 &&
+            (responseInput.indexOf('No') == -1 ||
+                responseInput.indexOf('no') == -1))
+    );
+}
