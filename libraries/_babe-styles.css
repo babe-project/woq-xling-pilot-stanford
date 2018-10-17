@@ -494,3 +494,7 @@ button:focus {
     display: none;
     color: orangered;
 }
+
+.options-container {
+    text-align: center;
+}

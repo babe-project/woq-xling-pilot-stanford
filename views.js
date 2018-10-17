@@ -68,20 +68,13 @@ babeViews.describePicture = function(config) {
             
             <h1 class="title">{{ title }}</h1>
                 
-                <p>Here will be a picure with  
-                {{ nrTotal }} balls 
-                of which {{ nrFocal }} 
-                are  {{ focalColor }}.</p>
+                <p> How would you describe this picture in your native language? Put &#64; (<i>at</i> signs) around each of the words that express quantity. </p>
+
+                <p>Please provide at least one description.</p>
 
                 <br/>
-                
+
                 <canvas id="situation" style="width:600px;height:300px;background:lightgrey"></canvas>
-
-                <br/>
-
-                <p> How would you translate this description of the picture into your native language? Put &#64; (<i>at</i> signs) around each of the words that express quantity. </p>
-
-                <p>Please provide at least one translation.</p>
 
                 <br/>
 
@@ -111,15 +104,6 @@ babeViews.describePicture = function(config) {
                 config.data[CT],
                 'random'
             );
-
-            // draw(
-            //     'situation',
-            //     config.data[CT].nrTotal,
-            //     config.data[CT].nrFocal,
-            //     config.data[CT].focalColor,
-            //     // Other color
-            //     config.data[CT].focalColor === 'black' ? 'white' : 'black'
-            // );
 
             $('#the-button').on('click', function(e) {
                 // First hide the error info in case there's a previous error already shown.
@@ -176,19 +160,38 @@ babeViews.truthValueJudgement = function(config) {
         render(CT, _babe) {
             let startTime = Date.now();
 
-            const viewTemplate = `<div class='view'>
+            const viewTemplate = `<p class='view'>
                 {{# title }}
                 <h1 class="title">{{ title }}</h1>
                 {{/ title }}
                 
-                Here will be a picure with  
-                {{# nrTotal }}	{{ nrTotal }}  {{/ nrTotal }} balls 
-                of which {{# nrFocal }}	{{ nrFocal }}  {{/ nrFocal }} 
-                are  {{# focalColor }}	{{ focalColor }}  {{/ focalColor }}.
-                
-                There should then be the usual binary forced choice task with two buttons and their labels
+                <p>Would you agree with the following statement about the picture?</p>
 
-                <button id="the-button">Press me!</button>
+                <p class="picturedescription"></p>
+
+                <canvas id="binaryCanvas" style="width:600px;height:300px;background:lightgrey"></canvas>
+
+                <br/>
+
+                <div class="options-container">
+                <div>
+                    <input type="radio" id="responseTrue"
+                        name="response" value="true">
+                    <label for="responseTrue">Agree</label>
+
+                    <input type="radio" id="responseFalse"
+                        name="response" value="false">
+                    <label for="responseFalse">Disagree</label>
+                </div>
+                </div>
+
+                <br/>
+
+                <p>(Shortcuts: Press "a" to select "Agree"; press "d" to select "Disagree". Press "Enter" to continue.)</p>
+
+                <button id="the-button">Continue</button>
+
+                <p class="error-info err-no-selection">Please select an answer.</p>
             </div>`;
 
             $('#main').html(
@@ -200,14 +203,42 @@ babeViews.truthValueJudgement = function(config) {
                 })
             );
 
-            $('#the-button').on('click', function(e) {
-                _babe.trial_data.push({
-                    trial_type: config.trial_type,
-                    trial_number: CT + 1,
-                    RT: Date.now() - startTime
-                });
-                _babe.findNextView();
-            });
+            const binaryNext = function(e) {
+                if (!someOptionSelected()) {
+                    $('.err-no-selection').show();
+                } else {
+                    _babe.trial_data.push({
+                        trial_type: config.trial_type,
+                        trial_number: CT + 1,
+                        RT: Date.now() - startTime,
+                        binaryChoice: getResponse()
+                    });
+                    _babe.findNextView();
+                }
+            };
+
+            // Should add some listener/event handler on the True and False options.
+            document.onkeydown = function(e) {
+                e = e || window.event;
+                if (e.keyCode == 65) {
+                    document.getElementById('responseTrue').checked = true;
+                    // Might not automatically advance for now, since it might make it too easy for the participant to skip it immediately.
+                    // _s.button();
+                } else if (e.keyCode == 68) {
+                    document.getElementById('responseFalse').checked = true;
+                    // _s.button();
+                } else if (e.keyCode == 13) {
+                    binaryNext();
+                }
+            };
+
+            drawOnCanvas(
+                document.getElementById('binaryCanvas'),
+                config.data[CT],
+                'random'
+            );
+
+            $('#the-button').on('click', binaryNext);
         },
         CT: 0,
         trials: config.trials

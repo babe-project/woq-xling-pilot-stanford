@@ -7,6 +7,21 @@ function validButNoAtSign(responseInput) {
     );
 }
 
+function someOptionSelected() {
+    return (
+        document.getElementById('responseTrue').checked ||
+        document.getElementById('responseFalse').checked
+    );
+}
+
+function getResponse() {
+    if (document.getElementById('responseTrue').checked) {
+        return 'true';
+    } else if (document.getElementById('responseFalse').checked) {
+        return 'false';
+    }
+}
+
 // Function from canvasTemplate
 // draws the shapes on the canvas
 // gets the canvas element and the trial info as arguments
