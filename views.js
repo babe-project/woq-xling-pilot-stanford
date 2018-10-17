@@ -86,9 +86,9 @@ babeViews.describePicture = function(config) {
                 <br/>
 
                 <textarea class="response-input response-input-1" cols="40"></textarea>
-                <br><br>
+                <br>
                 <textarea class="response-input response-input-2" cols="40"></textarea>
-                <br><br>
+                <br>
                 <textarea class="response-input response-input-3" cols="40"></textarea>
 
                 <p class="error-info err-no-input">Please fill in at least one textarea.</p>
