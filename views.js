@@ -6,6 +6,112 @@ let introView = babeViews.intro({
     buttonText: 'Begin Experiment'
 });
 
+// Here the participants indicate their mother tongue.
+babeViews.indicateNativeLanguage = function(config) {
+    // I don't think there's any other way than to fetch the data in this function, at this moment.
+
+    const _indicateNativeLanguage = {
+        name: config.name,
+        title: config.title,
+        render: async function(CT, _babe) {
+            let startTime = Date.now();
+
+            const viewTemplateLoading = `Loading...`;
+            $('#main').html(viewTemplateLoading);
+
+            const viewTemplate = `<div class='view'>
+                <h1 class="title">${this.title}</h1>
+                <p>Please indicate your native language.</p>
+
+                <br>
+
+                <select name="nativeLang" id="lang-select"></select>
+
+                <br>
+
+                <p>If your native language is not yet in the above list, please enter it below:</p>
+
+                <textarea class="native-lang-input" cols="30" ></textarea>
+
+                <button id="the-button">Continue</button>
+
+                <p class="error-info err-no-nativelang">Please indicate your native language</p>
+            </div>`;
+
+            const regex = '/submit_experiment/';
+            const prevResultsURL = config_deploy.submissionURL.replace(
+                regex,
+                '/retrieve_experiment/'
+            );
+
+            const prevResults = await fetch(prevResultsURL).then((dataLoad) => {
+                if (dataLoad.status === 200) {
+                    return dataLoad.json();
+                } else {
+                    return [];
+                }
+            });
+
+            // This is just a temporary solution. There should be a way to let the frontend framework to fetch the previous results at the beginning of the experiment.
+            _babe.prevResults = prevResults;
+
+            const prevLanguages = new Set();
+
+            // Nothing will happen if prevResults is empty, I believe.
+            for (const experiment of prevResults) {
+                // Apparently the first trial should be the trial asking for the native language... This is a bit unreliable. It would be better if we can merge it just like we did it in the additional information trial.
+                const thisNativeLanguage = experiment[0].native_language;
+                prevLanguages.add(thisNativeLanguage);
+            }
+
+            // Set the authentic view template after loading.
+            $('#main').html(viewTemplate);
+
+            const langSelect = document.getElementById('lang-select');
+            let options =
+                '<option value="choose">Please choose a language</option>';
+            for (const lang of prevLanguages) {
+                options += `<option value="${lang}">${lang}</option>`;
+            }
+            langSelect.innerHTML = options;
+
+            $('#the-button').on('click', function(e) {
+                $('.err-no-nativelang').hide();
+                // Check whether they entered a language
+                let nativeLang = document.getElementById('lang-select').value;
+                // If they didn't make a selection
+                if (nativeLang == null || nativeLang === 'choose') {
+                    const nativeLangInput = $('.native-lang-input').val();
+                    if (nativeLangInput.length <= 0) {
+                        $('.err-no-nativelang').show();
+                        return;
+                    } else {
+                        nativeLang = nativeLangInput;
+                    }
+                }
+
+                _babe.trial_data.push({
+                    trial_type: config.trial_type,
+                    trial_number: CT + 1,
+                    native_language: nativeLang
+                });
+                _babe.findNextView();
+            });
+        },
+        CT: 0,
+        trials: 1
+    };
+
+    return _indicateNativeLanguage;
+};
+
+let indicateNativeLanguage = babeViews.indicateNativeLanguage({
+    name: 'nativeLang',
+    trials: 1,
+    title: 'Please indicate your native language',
+    trial_type: 'nativeLang'
+});
+
 let instructionsView = babeViews.instructions({
     name: 'instructions',
     trials: 1,
@@ -68,7 +174,7 @@ babeViews.describePicture = function(config) {
             
             <h1 class="title">{{ title }}</h1>
                 
-                <p> How would you describe this picture in your native language? Put &#64; (<i>at</i> signs) around each of the words that express quantity. </p>
+                <p> How would you describe the quantity of the <i>{{focalColor}}</i> dots in this picture in your native language? Put &#64; (<i>at</i> signs) around each of the words that express quantity. </p>
 
                 <p>Please provide at least one description.</p>
 
@@ -132,7 +238,10 @@ babeViews.describePicture = function(config) {
                         RT: Date.now() - startTime,
                         response1: responseInput1,
                         response2: responseInput2,
-                        response3: responseInput3
+                        response3: responseInput3,
+                        focalColor: config.data[CT].focalColor,
+                        nrTotal: config.data[CT].total,
+                        nrFocal: config.data[CT].focalNumber
                     });
                     _babe.findNextView();
                 }
@@ -167,7 +276,7 @@ babeViews.truthValueJudgement = function(config) {
                 
                 <p>Would you agree with the following statement about the picture?</p>
 
-                <p class="picturedescription"></p>
+                <p class="picturedescription">Here is where the description appears.</p>
 
                 <canvas id="binaryCanvas" style="width:600px;height:300px;background:lightgrey"></canvas>
 
@@ -203,6 +312,9 @@ babeViews.truthValueJudgement = function(config) {
                 })
             );
 
+            // Here is where one accesses the previous results.
+            console.table(_babe.prevResults);
+
             const binaryNext = function(e) {
                 if (!someOptionSelected()) {
                     $('.err-no-selection').show();
@@ -211,7 +323,12 @@ babeViews.truthValueJudgement = function(config) {
                         trial_type: config.trial_type,
                         trial_number: CT + 1,
                         RT: Date.now() - startTime,
-                        binaryChoice: getResponse()
+                        sentence_shown:
+                            'This will be the sentence displayed in this trial',
+                        binaryChoice: getResponse(),
+                        focalColor: config.data[CT].focalColor,
+                        nrTotal: config.data[CT].total,
+                        nrFocal: config.data[CT].focalNumber
                     });
                     _babe.findNextView();
                 }
@@ -260,6 +377,7 @@ let truthValueJudgement = babeViews.truthValueJudgement({
 const views_seq = [
     introView,
     instructionsView,
+    indicateNativeLanguage,
     //    practiceView,
     beginFirstPart,
     describePicture,
