@@ -490,6 +490,8 @@ button:focus {
     }
 }
 
+/* Some custom styles for this experiment. */
+
 .error-info {
     display: none;
     color: orangered;
@@ -497,4 +499,13 @@ button:focus {
 
 .options-container {
     text-align: center;
+}
+
+select {
+    display: block;
+    margin: 0 auto;
+}
+
+.picturedescription {
+    font-style: italic;
 }
