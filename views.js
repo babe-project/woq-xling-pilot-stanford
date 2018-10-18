@@ -6,7 +6,6 @@ let introView = babeViews.intro({
     buttonText: 'Begin Experiment'
 });
 
-// Here the participants indicate their mother tongue.
 babeViews.indicateNativeLanguage = function(config) {
     // I don't think there's any other way than to fetch the data in this function, at this moment.
 
@@ -57,7 +56,7 @@ babeViews.indicateNativeLanguage = function(config) {
 
             const prevLanguages = new Set();
 
-            // Nothing will happen if prevResults is empty, I believe.
+            // Nothing will happen if prevResults is empty.
             for (const experiment of prevResults) {
                 // Apparently the first trial should be the trial asking for the native language... This is a bit unreliable. It would be better if we can merge it just like we did it in the additional information trial.
                 const thisNativeLanguage = experiment[0].native_language;
@@ -339,11 +338,8 @@ babeViews.truthValueJudgement = function(config) {
                 e = e || window.event;
                 if (e.keyCode == 65) {
                     document.getElementById('responseTrue').checked = true;
-                    // Might not automatically advance for now, since it might make it too easy for the participant to skip it immediately.
-                    // _s.button();
                 } else if (e.keyCode == 68) {
                     document.getElementById('responseFalse').checked = true;
-                    // _s.button();
                 } else if (e.keyCode == 13) {
                     binaryNext();
                 }
