@@ -53,6 +53,7 @@ babeViews.indicateNativeLanguage = function(config) {
 
             // This is just a temporary solution. There should be a way to let the frontend framework to fetch the previous results at the beginning of the experiment.
             _babe.prevResults = prevResults;
+			_babe.freeProduction = []; // where to store the production data
 
             const prevLanguages = new Set();
 
@@ -242,6 +243,31 @@ babeViews.describePicture = function(config) {
                         nrTotal: config.data[CT].total,
                         nrFocal: config.data[CT].focalNumber
                     });
+					// prepare seperate data storage for reuse in Part II
+					var descriptions = [];
+					responseInput1.length > 0 ? descriptions.push(responseInput1) : false
+					responseInput2.length > 0 ? descriptions.push(responseInput2) : false
+					responseInput3.length > 0 ? descriptions.push(responseInput3) : false
+					// this matrix will hold the observations of TRUE and FALSE answers for each state
+					var observations = [Array.apply(null, Array(config.data[CT].total+1)).map(Number.prototype.valueOf,0),
+									    Array.apply(null, Array(config.data[CT].total+1)).map(Number.prototype.valueOf,0)];
+					observations[0][config.data[CT].focalNumber] = 1;
+					_.map(descriptions, function(d) {
+						_babe.freeProduction.push({
+							description: d,
+							focalColor: config.data[CT].focalColor,
+                        	nrTotal: config.data[CT].total,
+                        	nrFocal: config.data[CT].focalNumber,
+							observations: observations
+						});	
+					})
+//					console.log(_babe.freeProduction);
+					// hacky way of adjusting length of Part II (todo: improve on this!)
+					// five trials for each unique given description
+					var all_descriptions = _.uniq(_.map(_babe.freeProduction, function(data) {
+						return(data.description)	
+					}))
+					_babe.views_seq[6].trials = all_descriptions.length * 5;
                     _babe.findNextView();
                 }
             });
@@ -266,6 +292,9 @@ babeViews.truthValueJudgement = function(config) {
         name: config.name,
         title: config.title,
         render(CT, _babe) {
+			
+			var currentFocalNumer = sample_focalNumber(_babe.freeProduction[CT]);
+			
             let startTime = Date.now();
 
             const viewTemplate = `<p class='view'>
@@ -275,7 +304,7 @@ babeViews.truthValueJudgement = function(config) {
                 
                 <p>Would you agree with the following statement about the picture?</p>
 
-                <p class="picturedescription">Here is where the description appears.</p>
+                <p class="picturedescription">{{ description}}</p>
 
                 <canvas id="binaryCanvas" style="width:600px;height:300px;background:lightgrey"></canvas>
 
@@ -305,15 +334,18 @@ babeViews.truthValueJudgement = function(config) {
             $('#main').html(
                 Mustache.render(viewTemplate, {
                     title: this.title,
-                    focalColor: config.data[CT].focalColor,
-                    nrTotal: config.data[CT].total,
-                    nrFocal: config.data[CT].focalNumber
+                    focalColor: _babe.freeProduction[CT].focalColor,
+                    nrTotal: _babe.freeProduction[CT].total,
+                    nrFocal: currentFocalNumer,
+					description: _babe.freeProduction[CT].description
                 })
             );
 
             // Here is where one accesses the previous results.
-            console.table(_babe.prevResults);
-
+//            console.table(_babe.prevResults);
+//			console.table(_babe.trial_data);
+//			console.log(_babe.freeProduction);
+			
             const binaryNext = function(e) {
                 if (!someOptionSelected()) {
                     $('.err-no-selection').show();
@@ -323,7 +355,7 @@ babeViews.truthValueJudgement = function(config) {
                         trial_number: CT + 1,
                         RT: Date.now() - startTime,
                         sentence_shown:
-                            'This will be the sentence displayed in this trial',
+                            _babe.freeProduction[CT].description,
                         binaryChoice: getResponse(),
                         focalColor: config.data[CT].focalColor,
                         nrTotal: config.data[CT].total,
