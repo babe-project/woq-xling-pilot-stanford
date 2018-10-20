@@ -108,6 +108,15 @@ var drawOnCanvas = function(canvasElem, trialInfo, displayType) {
 };
 
 
+var binomial = function(n, k) {
+     if ((typeof n !== 'number') || (typeof k !== 'number')) 
+  return false; 
+    var coeff = 1;
+    for (var x = n-k+1; x <= n; x++) coeff *= x;
+    for (x = 1; x <= k; x++) coeff /= x;
+    return coeff;
+}
+
 // returns an approximately optimal stimulus based on a production trial
 var sampleFocalNumber = function(productionTrial) {
 	// dev file for opt exp design 4 Stanford pilot
@@ -147,9 +156,9 @@ var sampleFocalNumber = function(productionTrial) {
 		var llh = _.map(hypotheses, function(h) {
 							return(vector_prod(_.map(_.range(TSS+1), function(s) {
 										var true_description = h[0] <= s && s <= h[1]
-										var true_factor  =  observations[0][s] == 0 ? 1 : true_description ? observations[0][s] * (1-eps) : observations[0][s] * eps
-										var false_factor = observations[1][s] == 0 ? 1 : !true_description ? observations[1][s] * (1-eps) : observations[1][s] * eps
-										return(true_factor * false_factor)
+										var true_factor  =  observations[0][s] == 0 ? 1 : true_description ? (1-eps) ** observations[0][s] : eps ** observations[0][s]
+										var false_factor = observations[1][s] == 0 ? 1 : !true_description ? (1-eps) ** observations[1][s] : eps ** observations[1][s]
+										return(binomial(observations[0][s] + observations[1][s], observations[0][s]) * true_factor * false_factor)
 									})))
 					})
 		return(llh)

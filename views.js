@@ -298,9 +298,12 @@ babeViews.truthValueJudgement = function(config) {
 			var currentFocalNumber = sampleFocalNumber(_babe.freeProduction[currentDescriptionIndex]);
 			var currentTotal = _babe.freeProduction[currentDescriptionIndex].nrTotal;
 			var currentDescription = _babe.freeProduction[currentDescriptionIndex].description;
-			var currentFocalColor = "black";
+			var currentFocalColor = _babe.freeProduction[currentDescriptionIndex].focalColor;
 			var trialInfo = currentTotal == 49 ? createPic49(currentFocalNumber) : createPic10(currentFocalNumber);
-			var currentFocalColor = trialInfo.focalColor;
+			console.table(trialInfo)
+			console.table(_babe.freeProduction[currentDescriptionIndex].observations)
+			trialInfo.focalColor = currentFocalColor; // override the random choice of focal color
+			trialInfo.otherColor = currentFocalColor === 'black' ? 'white' : 'black'; // override the random choice of focal color
 			
             let startTime = Date.now();
 
@@ -368,6 +371,7 @@ babeViews.truthValueJudgement = function(config) {
                         nrTotal: currentTotal,
                         nrFocal: currentFocalNumber
                     });
+					_babe.freeProduction[currentDescriptionIndex].observations[getResponse() == "true" ? 0 : 1][currentFocalNumber] += 1;
                     _babe.findNextView();
                 }
             };
