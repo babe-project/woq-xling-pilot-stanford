@@ -248,26 +248,28 @@ babeViews.describePicture = function(config) {
 					responseInput1.length > 0 ? descriptions.push(responseInput1) : false
 					responseInput2.length > 0 ? descriptions.push(responseInput2) : false
 					responseInput3.length > 0 ? descriptions.push(responseInput3) : false
-					// this matrix will hold the observations of TRUE and FALSE answers for each state
-					var observations = [Array.apply(null, Array(config.data[CT].total+1)).map(Number.prototype.valueOf,0),
-									    Array.apply(null, Array(config.data[CT].total+1)).map(Number.prototype.valueOf,0)];
-					observations[0][config.data[CT].focalNumber] = 1;
 					_.map(descriptions, function(d) {
-						_babe.freeProduction.push({
-							description: d,
-							focalColor: config.data[CT].focalColor,
-                        	nrTotal: config.data[CT].total,
-                        	nrFocal: config.data[CT].focalNumber,
-							observations: observations
-						});	
+						var dIndex = _babe.freeProduction.length ==0 ? -1 : _.findIndex(_babe.freeProduction, function(p) {return(p.description == d & p.nrTotal == config.data[CT].total) });
+						if (dIndex >= 0) { // existing description
+							_babe.freeProduction[dIndex].observations[0][config.data[CT].focalNumber] += 1;
+						} else { // new description
+							// this matrix will hold the observations of TRUE and FALSE answers for each state
+							var observations = [Array.apply(null, Array(config.data[CT].total+1)).map(Number.prototype.valueOf,0),
+							Array.apply(null, Array(config.data[CT].total+1)).map(Number.prototype.valueOf,0)];
+							observations[0][config.data[CT].focalNumber] = 1;
+							_babe.freeProduction.push({
+								description: d,
+								nrTotal: config.data[CT].total,
+								focalColor: config.data[CT].focalColor,
+								observations: observations
+							});	
+						}
+							
 					})
 //					console.log(_babe.freeProduction);
 					// hacky way of adjusting length of Part II (todo: improve on this!)
-					// five trials for each unique given description
-					var all_descriptions = _.uniq(_.map(_babe.freeProduction, function(data) {
-						return(data.description)	
-					}))
-					_babe.views_seq[6].trials = all_descriptions.length * 5;
+					// five trials for each unique given description for each TSS
+					_babe.views_seq[6].trials = _babe.freeProduction.length * 5;
                     _babe.findNextView();
                 }
             });
@@ -292,8 +294,13 @@ babeViews.truthValueJudgement = function(config) {
         name: config.name,
         title: config.title,
         render(CT, _babe) {
-			
-			var currentFocalNumer = sample_focalNumber(_babe.freeProduction[CT]);
+			var currentDescriptionIndex = _.floor(CT/5)
+			var currentFocalNumber = sampleFocalNumber(_babe.freeProduction[currentDescriptionIndex]);
+			var currentTotal = _babe.freeProduction[currentDescriptionIndex].nrTotal;
+			var currentDescription = _babe.freeProduction[currentDescriptionIndex].description;
+			var currentFocalColor = "black";
+			var trialInfo = currentTotal == 49 ? createPic49(currentFocalNumber) : createPic10(currentFocalNumber);
+			var currentFocalColor = trialInfo.focalColor;
 			
             let startTime = Date.now();
 
@@ -334,10 +341,10 @@ babeViews.truthValueJudgement = function(config) {
             $('#main').html(
                 Mustache.render(viewTemplate, {
                     title: this.title,
-                    focalColor: _babe.freeProduction[CT].focalColor,
-                    nrTotal: _babe.freeProduction[CT].total,
-                    nrFocal: currentFocalNumer,
-					description: _babe.freeProduction[CT].description
+                    focalColor: currentFocalColor,
+                    nrTotal: currentTotal,
+                    nrFocal: currentFocalNumber,
+					description: currentDescription
                 })
             );
 
@@ -355,11 +362,11 @@ babeViews.truthValueJudgement = function(config) {
                         trial_number: CT + 1,
                         RT: Date.now() - startTime,
                         sentence_shown:
-                            _babe.freeProduction[CT].description,
+                            currentDescription,
                         binaryChoice: getResponse(),
-                        focalColor: config.data[CT].focalColor,
-                        nrTotal: config.data[CT].total,
-                        nrFocal: config.data[CT].focalNumber
+                        focalColor: currentFocalColor,
+                        nrTotal: currentTotal,
+                        nrFocal: currentFocalNumber
                     });
                     _babe.findNextView();
                 }
@@ -379,7 +386,7 @@ babeViews.truthValueJudgement = function(config) {
 
             drawOnCanvas(
                 document.getElementById('binaryCanvas'),
-                config.data[CT],
+                trialInfo,
                 'random'
             );
 

@@ -22,6 +22,34 @@ function getResponse() {
     }
 }
 
+var createPic10 = function(nrFocal) {
+	const fc = _.shuffle(['black', 'white'])[0];
+    return {
+        total: 10,
+        size: 20,
+        rows: 2,
+        focalColor: fc,
+        otherColor: fc === 'black' ? 'white' : 'black',
+        focalShape: 'circle',
+        focalNumber: nrFocal,
+        otherShape: 'circle'
+    };
+}
+
+var createPic49 = function(nrFocal) {
+	const fc = _.shuffle(['black', 'white'])[0];
+	return {
+		total: 49,
+		size: 10,
+		rows: 5,
+		focalColor: fc,
+		otherColor: fc === 'black' ? 'white' : 'black',
+		focalShape: 'circle',
+		focalNumber: nrFocal,
+		otherShape: 'circle'
+	};
+}
+
 // Function from canvasTemplate
 // draws the shapes on the canvas
 // gets the canvas element and the trial info as arguments
@@ -83,9 +111,9 @@ var drawOnCanvas = function(canvasElem, trialInfo, displayType) {
 // returns an approximately optimal stimulus based on a production trial
 var sampleFocalNumber = function(productionTrial) {
 	// dev file for opt exp design 4 Stanford pilot
-
+	
 	// total set size
-	var TSS = 7;
+	var TSS = productionTrial.nrTotal;
 
 	// global error probability
 	var eps = 0.01
@@ -96,8 +124,7 @@ var sampleFocalNumber = function(productionTrial) {
 																   function(upper) {return([lower,lower+upper])}))} ));
 
 	// dummy example matrix of observations (rows = true/false judgements, cols = state (0,1,...,TSS), entry: number of observed judgements)
-	var observations = [[0,0,1,0,0,1,0,0],
-						[1,0,0,0,0,0,1,1]];
+	var observations = productionTrial.observations;
 
 	var vector_sum = function(vector) {
 		var sum = 0
@@ -164,5 +191,5 @@ var sampleFocalNumber = function(productionTrial) {
 	//	return(discrete_sample(_.range(TSS+1), softmax_probs))
 	}
 
-	softmax_sample(state_predictions, 10)
+	return(softmax_sample(state_predictions, 10))
 }

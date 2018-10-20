@@ -12,7 +12,7 @@ const config_deploy = {
     // set deployment method; use one of:
     //'debug', 'localServer', 'MTurk',
     // 'MTurkSandbox', 'Prolific', 'directLink'
-    deployMethod: 'directLink',
+    deployMethod: 'debug',
 
     // who to contact in case of trouble
     contact_email: 'YOUREMAIL@wherelifeisgreat.you',
