@@ -295,7 +295,7 @@ babeViews.truthValueJudgement = function(config) {
         title: config.title,
         render(CT, _babe) {
 			var currentDescriptionIndex = _.floor(CT/5)
-			var currentFocalNumber = sampleFocalNumber(_babe.freeProduction[currentDescriptionIndex]);
+			var currentFocalNumber = sampleFocalNumber_KL(_babe.freeProduction[currentDescriptionIndex]);
 			var currentTotal = _babe.freeProduction[currentDescriptionIndex].nrTotal;
 			var currentDescription = _babe.freeProduction[currentDescriptionIndex].description;
 			var currentFocalColor = _babe.freeProduction[currentDescriptionIndex].focalColor;
