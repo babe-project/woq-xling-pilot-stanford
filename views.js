@@ -6,6 +6,15 @@ let introView = babeViews.intro({
     buttonText: 'Begin Experiment'
 });
 
+let instructionsView = babeViews.instructions({
+    name: 'instructions',
+    trials: 1,
+    title: 'Instructions',
+    text:
+        'In this experiment we are interested in <strong>how to express quantity in your native language</strong>. There are two parts. We will explain each part before it begins.',
+    buttonText: 'Continue'
+});
+
 babeViews.indicateNativeLanguage = function(config) {
     // I don't think there's any other way than to fetch the data in this function, at this moment.
 
@@ -112,34 +121,31 @@ let indicateNativeLanguage = babeViews.indicateNativeLanguage({
     trial_type: 'nativeLang'
 });
 
-let instructionsView = babeViews.instructions({
-    name: 'instructions',
+let beginFirstPart = babeViews.instructions({
+    name: 'instructionsPart1',
     trials: 1,
-    title: 'Instructions',
+	title: 'Instructions for Part I',
     text:
-        'In this experiment we are interested in how you express quantity in your native language. There are several parts. ...',
-    buttonText: 'Go to first part.'
+        "In the first part, we will show you pictures of black or white dots on a gray background. For each picture, please provide at least one simple description, as if you were answering the question <strong>'How many of the dots are COLOR?'</strong> where COLOR could either be 'white' or 'black' as indicated on each screen. You can provide up to three answers to this question, but you must minimally provide one in order to be able to proceed. <br> <br> Possible English answers could be <strong>'all/none/some/most ... of the dots are COLOR'</strong>. Please try to give a sentence in your native language that provides similar information. <br><br> It is important that you <strong>avoid using numbers</strong>, either as integers or spelled out as words. Please <strong>use expressions that do not involve any reference to numbers</strong>. <br><br> Please mark the part that in an English sentence would be expressed by words like 'all', 'none', 'some', 'most', etc. by putting it between @XYZ@. For example, if English answers were allowed in this experiment, we could type '@Most@ of the dots are black'. But remember: <strong>type a sentence or expression in your native language</strong>, which you have indicated on the previous screen.",
+    buttonText: 'Continue'
 });
 
-//let practiceView = babeViews.forcedChoice({
-//    name: 'practice',
-//    trials: 2,
-//    trial_type: "practice",
-//    data: practice_trials
-//});
-
-let beginFirstPart = babeViews.begin({
-    name: 'beginFirst',
-    trials: 1,
-    text:
-        "In the first part, we will show you pictures of black or white dots on a gray background. Please provide a simple description of this picture, as if you were answering the question 'How many of the dots are COLOR' where COLOR could either be 'white' or 'black' as indicated on each screen. Possible English answers could be 'all/none/some/most ... of the dots are COLOR'. Please try to give a sentence in your native language that provides similar information. Please mark the part that in English would be expressed by words like 'all/none/some/most/ ...' by putting in between @XYZ@."
-});
-
-let beginSecondPart = babeViews.begin({
+let beginSecondPart = babeViews.instructions({
     name: 'Second',
     trials: 1,
+	title: 'Instructions for Part II',
     text:
-        'Thanks for your answers. We will now show you similar pictures again. We will also show you some of the responses that you (or other speakers of your native language) have given so far. For each picture and sentence, please judge whether the sentence is a good description of the picture.'
+        'Thanks for your answers! We will now move on to Part II of the experiment. Please take a short break if you want. Make sure you are focused on the following instructions and the second part. <br> <br> Part II will now show you descriptions which you have typed in during Part I. For each description you gave, we will show you a number of pictures similar to those in Part I again. For each picture and sentence, please <strong>judge whether the description is a good description of the picture</strong>.',
+	buttonText: 'Continue'
+});
+
+let beginThirdPart = babeViews.instructions({
+    name: 'Third',
+    trials: 1,
+	title: 'Instructions for Part III',
+    text:
+        'Thanks for your work so far! We are almost done. Please take a short break if you want. <br> <br> The third and last part of this experiment will ask you for English translations of your input from Part I. Please <strong>type in a single English paraphrase for the descriptions shown on each screen</strong>.',
+	buttonText: 'Continue'
 });
 
 let mainView = babeViews.forcedChoice({
@@ -172,17 +178,15 @@ babeViews.describePicture = function(config) {
 
             const viewTemplate = `<div class='view'>
             
-            <h1 class="title">{{ title }}</h1>
+            <h1 class="title">{{{ title }}}</h1>
+
+ 				<canvas id="situation" style="width:600px;height:300px;background:lightgrey"></canvas>
+
+                <br/>
                 
-                <p> How would you describe the quantity of the <i>{{focalColor}}</i> dots in this picture in your native language? Put &#64; (<i>at</i> signs) around each of the words that express quantity. </p>
+                <p> Describe the quantity of <i>{{focalColor}}</i> dots in this picture in your native language. Give one or up to three descriptions. Put &#64; (<i>at</i> signs) around each of the words that express quantity. </p>
 
-                <p>Please provide at least one description.</p>
-
-                <br/>
-
-                <canvas id="situation" style="width:600px;height:300px;background:lightgrey"></canvas>
-
-                <br/>
+                <br>
 
                 <textarea class="response-input response-input-1" cols="40"></textarea>
                 <br>
@@ -198,7 +202,7 @@ babeViews.describePicture = function(config) {
 
             $('#main').html(
                 Mustache.render(viewTemplate, {
-                    title: this.title,
+                    title: this.title + "<strong>" + config.data[CT].focalColor + "</strong>" + "?",
                     focalColor: config.data[CT].focalColor,
                     nrTotal: config.data[CT].total,
                     nrFocal: config.data[CT].focalNumber
@@ -269,7 +273,8 @@ babeViews.describePicture = function(config) {
 //					console.log(_babe.freeProduction);
 					// hacky way of adjusting length of Part II (todo: improve on this!)
 					// five trials for each unique given description for each TSS
-					_babe.views_seq[6].trials = _babe.freeProduction.length * 5;
+					_babe.views_seq[6].trials = _babe.freeProduction.length * 5; // part II
+					_babe.views_seq[8].trials = _babe.freeProduction.length;     // part I
                     _babe.findNextView();
                 }
             });
@@ -283,10 +288,10 @@ babeViews.describePicture = function(config) {
 
 let describePicture = babeViews.describePicture({
     name: 'describePicture',
-    title: 'Describe the picture',
+    title: 'How many of the dots are ',
     trial_type: 'describePicture',
     data: main_trials,
-    trials: 3 // TODO: set eventually to : main_trials.length
+    trials: main_trials.length // TODO: set eventually to : main_trials.length
 });
 
 babeViews.truthValueJudgement = function(config) {
@@ -309,32 +314,41 @@ babeViews.truthValueJudgement = function(config) {
 
             const viewTemplate = `<p class='view'>
                 {{# title }}
-                <h1 class="title">{{ title }}</h1>
+                <h1 class="title">{{{ title }}}</h1>
                 {{/ title }}
-                
-                <p>Would you agree with the following statement about the picture?</p>
 
-                <p class="picturedescription">{{ description}}</p>
+                <br>
+
+                <p class="picturedescription"> {{ description }} </p>
+
+				<br>
+
+
+				<br>
 
                 <canvas id="binaryCanvas" style="width:600px;height:300px;background:lightgrey"></canvas>
 
-                <br/>
+                <br>
+
+				<br>
+
+                <p> Is this a good description of the picture as an answer to the question?</p>
 
                 <div class="options-container">
                 <div>
                     <input type="radio" id="responseTrue"
                         name="response" value="true">
-                    <label for="responseTrue">Agree</label>
+                    <label for="responseTrue">affirm</label>
 
                     <input type="radio" id="responseFalse"
                         name="response" value="false">
-                    <label for="responseFalse">Disagree</label>
+                    <label for="responseFalse">deny</label>
                 </div>
                 </div>
 
                 <br/>
 
-                <p>(Shortcuts: Press "a" to select "Agree"; press "d" to select "Disagree". Press "Enter" to continue.)</p>
+                <p>(Press <strong>a</strong> to select "affirm", <strong>d</strong> for "deny", and <strong>Enter</strong> to continue.)</p>
 
                 <button id="the-button">Continue</button>
 
@@ -343,10 +357,7 @@ babeViews.truthValueJudgement = function(config) {
 
             $('#main').html(
                 Mustache.render(viewTemplate, {
-                    title: this.title,
-                    focalColor: currentFocalColor,
-                    nrTotal: currentTotal,
-                    nrFocal: currentFocalNumber,
+                    title: "How many of the dots are <strong>" +  currentFocalColor + "</strong>?",
 					description: currentDescription
                 })
             );
@@ -405,10 +416,84 @@ babeViews.truthValueJudgement = function(config) {
 
 let truthValueJudgement = babeViews.truthValueJudgement({
     name: 'truthValueJudgement',
-    title: 'is the sentence a good description of the picture',
+    title: 'Is this a good description of the picture?',
     trial_type: 'truthValueJudgement',
     data: main_trials,
-    trials: 3 // set eventually to : main_trials.length
+    trials: 3 // this is set automatically
+});
+
+
+babeViews.translateInput = function(config) {
+    const _translateInput = {
+        name: config.name,
+        title: config.title,
+        render(CT, _babe) {
+			var currentDescription = _babe.freeProduction[CT].description;
+			
+            let startTime = Date.now();
+
+            const viewTemplate = `<p class='view'>
+                {{# title }}
+                <h1 class="title">{{ title }}</h1>
+                {{/ title }}
+                
+                <br>
+
+                <p class="picturedescription"> {{ description }} </p>
+
+				<br>
+				<br>
+
+				<textarea class="response-input response-input-1" cols="40"></textarea>
+                <br>
+
+                <button id="the-button">Continue</button>
+
+                <p class="error-info err-no-input">Please fill in an English translation.</p>
+            </div>`;
+
+            $('#main').html(
+                Mustache.render(viewTemplate, {
+                    title: this.title,
+					description: currentDescription
+                })
+            );
+			
+            $('#the-button').on('click', function(e) {
+                // First hide the error info in case there's a previous error already shown.
+                $('.error-info').hide();
+                // Collect the responses
+                const responseInput1 = $('.response-input-1').val();
+
+                if (
+                    responseInput1.length <= 0 
+                ) {
+                    $('.err-no-input').show();
+                } else {
+                    _babe.trial_data.push({
+                        trial_type: config.trial_type,
+                        trial_number: CT + 1,
+                        RT: Date.now() - startTime,
+                        translation: responseInput1
+                    });
+                    _babe.findNextView();
+                }
+			});
+				
+        },
+        CT: 0,
+        trials: config.trials
+    };
+
+    return _translateInput;
+};
+
+let translateInput = babeViews.translateInput({
+    name: 'translateInput',
+    title: 'Please type a good English translation of ... ',
+    trial_type: 'translateInput',
+    data: main_trials,
+    trials: 3 // this is set automatically
 });
 
 // customize the experiment by specifying a view order and a trial structure
@@ -422,6 +507,8 @@ const views_seq = [
     describePicture,
     beginSecondPart,
     truthValueJudgement,
+	beginThirdPart,
+    translateInput,
     postTestView,
     thanksView
 ];

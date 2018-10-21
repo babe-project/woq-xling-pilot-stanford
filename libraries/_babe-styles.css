@@ -507,5 +507,8 @@ select {
 }
 
 .picturedescription {
-    font-style: italic;
+    color: rgba(0, 0.87, 0, 0.87);
+    font-family: 'Playfair Display', 'Noto Serif', serif;
+    font-size: 28px;
+    text-align: center;
 }

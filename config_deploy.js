@@ -12,10 +12,10 @@ const config_deploy = {
     // set deployment method; use one of:
     //'debug', 'localServer', 'MTurk',
     // 'MTurkSandbox', 'Prolific', 'directLink'
-    deployMethod: 'debug',
+    deployMethod: 'directLink',
 
     // who to contact in case of trouble
-    contact_email: 'YOUREMAIL@wherelifeisgreat.you',
+    contact_email: 'exprag@gmail.com',
 
     // OPTIONAL FIELDS
 
