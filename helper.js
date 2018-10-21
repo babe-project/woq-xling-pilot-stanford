@@ -152,20 +152,28 @@ var sampleFocalNumber = function(productionTrial) {
 		return(_.map(vector, function(i) {return(i/v_sum)}))
 	}
 
+	
+	var get_likelihood_for_hypo_and_state = function(h,s,obs) {
+		var true_description = h[0] <= s && s <= h[1]
+		var true_factor  =  obs[0][s] == 0 ? 1 : true_description ? (1-eps) ** obs[0][s] : eps ** obs[0][s]
+		var false_factor = obs[1][s] == 0 ? 1 : !true_description ? (1-eps) ** obs[1][s] : eps ** obs[1][s]
+		return(binomial(obs[0][s] + obs[1][s], obs[0][s]) * true_factor * false_factor)	
+	}
+	
+	
 	var get_likelihoods = function(observations) {
 		var llh = _.map(hypotheses, function(h) {
 							return(vector_prod(_.map(_.range(TSS+1), function(s) {
-										var true_description = h[0] <= s && s <= h[1]
-										var true_factor  =  observations[0][s] == 0 ? 1 : true_description ? (1-eps) ** observations[0][s] : eps ** observations[0][s]
-										var false_factor = observations[1][s] == 0 ? 1 : !true_description ? (1-eps) ** observations[1][s] : eps ** observations[1][s]
-										return(binomial(observations[0][s] + observations[1][s], observations[0][s]) * true_factor * false_factor)
+										get_likelihood_for_hypo_and_state(h,s,observations);
 									})))
 					})
 		return(llh)
 
 	}
 
-	var posterior = vector_normalize(get_likelihoods(observations))
+	var non_normalized_lh = get_likelihoods(observations);
+	
+	var posterior = vector_normalize(non_normalized_lh);
 
 	var get_state_predictions = function(posterior) {
 		return(_.map(_.range(TSS+1), function(s) {
@@ -192,13 +200,51 @@ var sampleFocalNumber = function(productionTrial) {
 		return(vector_sum(boolean_vector))
 	}
 
-	var softmax_sample = function(state_predictions, alpha) {
-		var softmax_probs = vector_normalize(_.map(state_predictions, function(s) {
+	var softmax_sample = function(prob_vector, alpha) {
+		var softmax_probs = vector_normalize(_.map(prob_vector, function(s) {
 			return(Math.exp(alpha * (0.5 - Math.abs(s-0.5))))
 		}))
 		return(discrete_sample(softmax_probs))
-	//	return(discrete_sample(_.range(TSS+1), softmax_probs))
 	}
 
-	return(softmax_sample(state_predictions, 10))
+//	return(softmax_sample(state_predictions, 10))
+	
+	
+	var KL = function(p, q){
+  		var pLocal = _.isArray(p) ? p : [p, 1 - p]
+  		var qLocal = _.isArray(q) ? q : [q, 1 - q]
+  		sum(_.map(_.range(pLocal.length), function(cell) {
+  		if (pLocal[cell] == 0 || qLocal==0) {
+      		0 // actually, if qLocal == 0 this should be -Inf, but this case cannot arise
+    	} else {
+      		pLocal[cell] *
+        	Math.log(pLocal[cell] / qLocal[cell])
+    	}
+  		}))
+  	};
+	
+	var get_expected_information_gain = function(non_normalized_lh, posterior, state_predictions) {
+		// for each state:
+		// - probability of each outcome TRUE or FALSE
+		// - times KL-divergence current state to new state after hypothetical outcome
+		return(_.map(_.range(TSS+1), function(s) {
+			var observe_true = non_normalized_lh;
+			var observe_false = non_normalized_lh;
+			observe_true[0][s] += 1;   // hypothetical observation TRUE at state s 
+			observe_false[1][s] += 1;  // hypothetical observation FALSE at state s
+			var posterior_true = vector_normalize(_.map(_.range(hypotheses.length), function(h) {
+				return(non_normalized_lh[h] / get_likelihood_for_hypo_and_state(h,s,observations) * get_likelihood_for_hypo_and_state(h,s,observe_true))
+			})); \\ hypothetical posterior after another TRUE observation
+			return(state_predictions[s] * KL(posterior_true, posterior) + (1-state_predictions) * KL(KL(posterior_false, posterior)))
+		}))
+	}
+	
+	return(get_expected_information_gain(non_normalized_lh, posterior, state_predictions))
 }
+
+
+var productionTrial = {observations: [[0,0,1,0,1,0,0], [1,0,0,0,0,1,0]],
+					   nrTotal: 7}
+
+sampleFocalNumber(productionTrial)
+
