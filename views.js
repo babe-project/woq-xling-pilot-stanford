@@ -1,8 +1,8 @@
 let introView = babeViews.intro({
     name: 'intro',
     trials: 1,
-    title: 'Welcome!',
-    text: 'Thanks for taking part in this experiment. .... ',
+    title: '',
+    text: 'We invite you to participate in a research study on language production and comprehension. <p>Your experimenter will ask you to do a linguistic task such as reading sentences or words, naming pictures or describing scenes, making up sentences of your own, or participating in a simple language game.</p><br><p>There are no risks or benefits of any kind involved in this study.</p><br><p> If you have read this form and have decided to participate in this experiment, please understand your participation is voluntary and you have the right to withdraw your consent or discontinue participation at any time without penalty or loss of benefits to which you are otherwise entitled. You have the right to refuse to do particular tasks. Your individual privacy will be maintained in all published and written data resulting from the study.</p><br><p> You may print this form for your records.</p><br><p><strong>CONTACT INFORMATION:</strong></p><br><p>If you have any questions, concerns or complaints about this research study, its procedures, risks and benefits, you should contact the Protocol Director Meghan Sumner at (650)-725-9336</p><br><p> If you are not satisfied with how this study is being conducted, or if you have any concerns, complaints, or general questions about the research or your rights as a participant, please contact the Stanford Institutional Review Board (IRB) to speak to someone independent of the research team at (650)-723-2480 or toll free at 1-866-680-2906. You can also write to the Stanford IRB, Stanford University, 3000 El Camino Real, Five Palo Alto Square, 4th Floor, Palo Alto, CA 94306 USA. </p><br><p> If you agree to participate, please proceed to the study tasks.',
     buttonText: 'Begin Experiment'
 });
 
