@@ -500,15 +500,15 @@ let translateInput = babeViews.translateInput({
 // specify view order
 const views_seq = [
     introView,
-    instructionsView,
-    indicateNativeLanguage,
-    //    practiceView,
-    beginFirstPart,
-    describePicture,
-    beginSecondPart,
-    truthValueJudgement,
-	beginThirdPart,
-    translateInput,
+//    instructionsView,
+//    indicateNativeLanguage,
+//    //    practiceView,
+//    beginFirstPart,
+//    describePicture,
+//    beginSecondPart,
+//    truthValueJudgement,
+//	beginThirdPart,
+//    translateInput,
     postTestView,
     thanksView
 ];
